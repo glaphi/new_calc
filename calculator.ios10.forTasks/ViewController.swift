@@ -30,6 +30,7 @@ class ViewController: UIViewController {
     
     private var brain = CalculatorBrain()
     
+    @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var display: UILabel!
     
     @IBAction func touchDigit(_ sender: UIButton) {
