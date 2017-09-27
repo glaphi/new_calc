@@ -12,11 +12,6 @@ class ViewController: UIViewController {
     
     var userIsInTheMiddleOfTyping = false
     
-/*    var displayValue: Double {
-        get { return Double(display.text!)! }
-        set { display.text = String(newValue) }
-    }
-*/
     var displayValue: Double {
         get { return Double(display.text!)! }
         set {
@@ -68,9 +63,14 @@ class ViewController: UIViewController {
             descriptionLabel.text = brain.description + "..."
         }
         else {
-            descriptionLabel.text = brain.description + "="
+            if brain.description != " " {
+                descriptionLabel.text = brain.description + "="
+            }
+            else {
+                descriptionLabel.text = " "
+            }
+            
         }
-        
     }
 }
 

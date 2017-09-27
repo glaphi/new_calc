@@ -30,6 +30,7 @@ struct CalculatorBrain {
             
             switch operation {
                 
+            // Constant
             case .constant (let value):
                 accumulator = value
                 if operationIsPending {
@@ -40,6 +41,8 @@ struct CalculatorBrain {
                 }
                 accWasSet = false
                 
+                
+            // Unary Operation
             case .unaryOperation (let function):
                 if accumulator != nil  {
                     if operationIsPending {
@@ -47,7 +50,12 @@ struct CalculatorBrain {
                     }
                     else {
                         if description != " " {
-                            description = symbol + "(" + description + ")"
+                            if accWasSet {
+                                description = symbol + "(" + String(accumulator!) + ")"
+                            }
+                            else {
+                                description = symbol + "(" + description + ")"
+                            }
                         }
                         else {
                             description = symbol + "(" +  String(accumulator!) + ")"
@@ -57,6 +65,8 @@ struct CalculatorBrain {
                     accWasSet = false
                 }
                 
+                
+            // Binary Operation
             case .binaryOperation (let function):
                 if accumulator != nil  {
                     if operationIsPending {
@@ -89,6 +99,7 @@ struct CalculatorBrain {
                 }
                 accWasSet = false
                 
+            // Equals
             case .equals :
                 if operationIsPending {
                     if accWasSet {
@@ -99,6 +110,7 @@ struct CalculatorBrain {
                     accWasSet = false
                 }
                 
+            // Clear all
             case .allClear :
                 accumulator = 0
                 pendingBinaryOperation = nil
