@@ -78,14 +78,15 @@ struct CalculatorBrain {
                             description = stringAccumulator + symbol
                         }
                     }
-                    
-                    pendingBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+                    storedBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
                     operationIsPending = true
                     accumulator = nil
                 }
                 else {
-                    if operationIsPending {
-                        pendingBinaryOperation!.function = function
+                    // This is in case the user keeps pushing binary operation buttons
+                    // The last one he pressed will be used in the future computations
+                    if storedBinaryOperation != nil {
+                        storedBinaryOperation!.function = function
                         description = String(description.characters.dropLast()) + symbol
                     }
                 }
@@ -105,7 +106,7 @@ struct CalculatorBrain {
             // Clear all
             case .allClear :
                 accumulator = 0
-                pendingBinaryOperation = nil
+                storedBinaryOperation = nil
                 operationIsPending = false
                 description = " "
                 accWasSet = false
@@ -120,13 +121,14 @@ struct CalculatorBrain {
     
     private var accumulator: Double?
     
+    // getting the string version of accumulator in the correct format
     private var stringAccumulator: String {
         if accumulator != nil {
             if accumulator!.remainder(dividingBy :1) == 0 {
                 return String(format: "%.0f", accumulator!)
             }
             else {
-                return String(accumulator!)
+                return String(format: "%.6f", accumulator!)
             }
         }
         else {
@@ -136,8 +138,8 @@ struct CalculatorBrain {
     
     private var accWasSet = false
     
-    private var pendingBinaryOperation: PendingBinaryOperation?
-    
+    private var storedBinaryOperation: PendingBinaryOperation?
+
     private struct PendingBinaryOperation {
         var function: (Double, Double) -> Double
         let firstOperand: Double
@@ -148,8 +150,8 @@ struct CalculatorBrain {
     }
     
     private mutating func performPendingOperation () {
-        if pendingBinaryOperation != nil && accumulator != nil {
-            accumulator = pendingBinaryOperation!.perform(withSecondOperand: accumulator!)
+        if storedBinaryOperation != nil && accumulator != nil {
+            accumulator = storedBinaryOperation!.perform(withSecondOperand: accumulator!)
             operationIsPending = false
         }
     }

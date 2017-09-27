@@ -18,7 +18,7 @@ class ViewController: UIViewController {
             if newValue.remainder(dividingBy :1) == 0{
                 display.text = String(format: "%.0f", newValue)
             } else {
-                display.text = String(newValue)
+                display.text = String(format: "%.6f", newValue)
             }
         }
     }
