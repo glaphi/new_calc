@@ -10,46 +10,95 @@ import Foundation
 
 struct CalculatorBrain {
     
+    var description = " "
+    
+    var operationIsPending = false
+    
     var result: Double? {
         return accumulator
     }
     
     mutating func setOperand(_ operand: Double) {
         accumulator = operand
+        accWasSet = true
     }
     
     // Main function performing the required action
     mutating func performOperation(_ symbol: String) {
+        
         if let operation = operations[symbol] {
+            
             switch operation {
                 
             case .constant (let value):
                 accumulator = value
+                if operationIsPending {
+                    description = description + symbol
+                }
+                else {
+                    description = symbol
+                }
+                accWasSet = false
                 
             case .unaryOperation (let function):
-                if accumulator != nil {
-                    accumulator = function(accumulator!) }
+                if accumulator != nil  {
+                    if operationIsPending {
+                        description = description + symbol + "(" +  String(accumulator!) + ")"
+                    }
+                    else {
+                        if description != " " {
+                            description = symbol + "(" + description + ")"
+                        }
+                        else {
+                            description = symbol + "(" +  String(accumulator!) + ")"
+                        }
+                    }
+                    accumulator = function(accumulator!)
+                    accWasSet = false
+                }
                 
             case .binaryOperation (let function):
-                if accumulator != nil {
+                if accumulator != nil  {
+                    if accWasSet {
+                        description = description + String(accumulator!) + symbol
+                    }
+                    else {
+                        description = description + symbol
+                    }
                     if operationIsPending {
                         performPendingOperation()
                     }
                     pendingBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
                     operationIsPending = true
+                    accumulator = nil
                 }
+                else {
+                    if operationIsPending {
+                        pendingBinaryOperation!.function = function
+                        description = String(description.characters.dropLast()) + symbol
+                    }
+                }
+                accWasSet = false
                 
             case .equals :
                 if operationIsPending {
+                    if accWasSet {
+                        description = description + String(accumulator!)
+                    }
                     performPendingOperation()
+                    operationIsPending = false
+                    accWasSet = false
                 }
-
+                
             case .allClear :
                 accumulator = 0
                 pendingBinaryOperation = nil
                 operationIsPending = false
+                description = " "
+                accWasSet = false
                 
             }
+            
         }
         
     }
@@ -58,12 +107,12 @@ struct CalculatorBrain {
     
     private var accumulator: Double?
     
+    private var accWasSet = false
+    
     private var pendingBinaryOperation: PendingBinaryOperation?
     
-    private var operationIsPending = false
-    
     private struct PendingBinaryOperation {
-        let function: (Double, Double) -> Double
+        var function: (Double, Double) -> Double
         let firstOperand: Double
         
         func perform (withSecondOperand secondOperand: Double) -> Double {
@@ -76,7 +125,6 @@ struct CalculatorBrain {
             accumulator = pendingBinaryOperation!.perform(withSecondOperand: accumulator!)
             operationIsPending = false
         }
-        
     }
     
     // Types of operations

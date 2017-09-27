@@ -64,6 +64,13 @@ class ViewController: UIViewController {
             displayValue = result
         }
         
+        if brain.operationIsPending {
+            descriptionLabel.text = brain.description + "..."
+        }
+        else {
+            descriptionLabel.text = brain.description + "="
+        }
+        
     }
 }
 
