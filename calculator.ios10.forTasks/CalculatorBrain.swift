@@ -46,19 +46,19 @@ struct CalculatorBrain {
             case .unaryOperation (let function):
                 if accumulator != nil  {
                     if operationIsPending {
-                        description = description + symbol + "(" +  String(accumulator!) + ")"
+                        description = description + symbol + "(" +  stringAccumulator + ")"
                     }
                     else {
                         if description != " " {
                             if accWasSet {
-                                description = symbol + "(" + String(accumulator!) + ")"
+                                description = symbol + "(" + stringAccumulator + ")"
                             }
                             else {
                                 description = symbol + "(" + description + ")"
                             }
                         }
                         else {
-                            description = symbol + "(" +  String(accumulator!) + ")"
+                            description = symbol + "(" +  stringAccumulator + ")"
                         }
                     }
                     accumulator = function(accumulator!)
@@ -71,7 +71,7 @@ struct CalculatorBrain {
                 if accumulator != nil  {
                     if operationIsPending {
                         if accWasSet {
-                            description = description + String(accumulator!) + symbol
+                            description = description + stringAccumulator + symbol
                         }
                         else {
                             description = description + symbol
@@ -80,7 +80,7 @@ struct CalculatorBrain {
                     }
                     else {
                         if accWasSet {
-                            description = String(accumulator!) + symbol
+                            description = stringAccumulator + symbol
                         }
                         else {
                             description = description + symbol
@@ -103,7 +103,7 @@ struct CalculatorBrain {
             case .equals :
                 if operationIsPending {
                     if accWasSet {
-                        description = description + String(accumulator!)
+                        description = description + stringAccumulator
                     }
                     performPendingOperation()
                     operationIsPending = false
@@ -127,6 +127,20 @@ struct CalculatorBrain {
     // Private variables etc
     
     private var accumulator: Double?
+    
+    private var stringAccumulator: String {
+        if accumulator != nil {
+            if accumulator!.remainder(dividingBy :1) == 0 {
+                return String(format: "%.0f", accumulator!)
+            }
+            else {
+                return String(accumulator!)
+            }
+        }
+        else {
+            return ""
+        }
+    }
     
     private var accWasSet = false
     
