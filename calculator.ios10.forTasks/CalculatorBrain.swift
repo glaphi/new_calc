@@ -21,6 +21,8 @@ struct CalculatorBrain {
     mutating func setOperand(_ operand: Double) {
         accumulator = operand
         accWasSet = true
+        // accWasSet is a private variable that tells when the user typed in the new operand
+        // It exists to differ this situation from when the accumulator is a result of previous computations
     }
     
     // Main function performing the required action
@@ -49,16 +51,11 @@ struct CalculatorBrain {
                         description = description + symbol + "(" +  stringAccumulator + ")"
                     }
                     else {
-                        if description != " " {
-                            if accWasSet {
-                                description = symbol + "(" + stringAccumulator + ")"
-                            }
-                            else {
-                                description = symbol + "(" + description + ")"
-                            }
+                        if accWasSet {
+                            description = symbol + "(" + stringAccumulator + ")"
                         }
                         else {
-                            description = symbol + "(" +  stringAccumulator + ")"
+                            description = symbol + "(" + description + ")"
                         }
                     }
                     accumulator = function(accumulator!)
@@ -69,21 +66,16 @@ struct CalculatorBrain {
             // Binary Operation
             case .binaryOperation (let function):
                 if accumulator != nil  {
-                    if operationIsPending {
-                        if accWasSet {
-                            description = description + stringAccumulator + symbol
-                        }
-                        else {
-                            description = description + symbol
-                        }
-                        performPendingOperation()
+                    if !accWasSet {
+                        description = description + symbol
                     }
                     else {
-                        if accWasSet {
-                            description = stringAccumulator + symbol
+                        if operationIsPending {
+                            description = description + stringAccumulator + symbol
+                            performPendingOperation()
                         }
                         else {
-                            description = description + symbol
+                            description = stringAccumulator + symbol
                         }
                     }
                     
@@ -138,7 +130,7 @@ struct CalculatorBrain {
             }
         }
         else {
-            return ""
+            return "Oh snap!"
         }
     }
     
