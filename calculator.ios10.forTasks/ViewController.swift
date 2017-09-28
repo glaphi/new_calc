@@ -27,15 +27,6 @@ class ViewController: UIViewController {
         }
     }
     
-    
-    
-    /* let foo = 0.123456789
-    let formatter = NumberFormatter()
-    formatter.maximumFractionDigits = 4
-    formatter.roundingMode = .down
-    let string = formatter.string(from: NSNumber(value: foo))
-    */
-    
     private var brain = CalculatorBrain()
     
     @IBOutlet weak var descriptionLabel: UILabel!
