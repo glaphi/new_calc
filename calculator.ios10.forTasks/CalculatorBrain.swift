@@ -123,6 +123,13 @@ struct CalculatorBrain {
                 if accumulator == 0 {
                     userWantsToStartOver = true
                 }
+                
+            // Generate a random number between 0 and 1
+            case .random :
+                accumulator = Double(arc4random()) / Double(UInt32.max)
+                if accumulator != nil {
+                    print(stringAccumulator)
+                }
             }
             
         }
@@ -178,6 +185,7 @@ struct CalculatorBrain {
         case equals
         case allClear
         case correct
+        case random
     }
     
     // Dictionary of all possible operations
@@ -201,6 +209,8 @@ struct CalculatorBrain {
         
         "C" : OperationType.correct,
         
-        "AC"    : OperationType.allClear
+        "AC"    : OperationType.allClear,
+        
+        "Rnd"   : OperationType.random
     ]
 }
