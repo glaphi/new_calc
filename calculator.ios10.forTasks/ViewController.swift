@@ -12,16 +12,29 @@ class ViewController: UIViewController {
     
     var userIsInTheMiddleOfTyping = false
     
+    let formatter = NumberFormatter()
+    
     var displayValue: Double {
         get { return Double(display.text!)! }
         set {
+            formatter.maximumFractionDigits = 6
+            formatter.minimumIntegerDigits = 1
             if newValue.remainder(dividingBy :1) == 0{
                 display.text = String(format: "%.0f", newValue)
             } else {
-                display.text = String(format: "%.6f", newValue)
+                display.text = formatter.string(from: NSNumber(value: newValue))
             }
         }
     }
+    
+    
+    
+    /* let foo = 0.123456789
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 4
+    formatter.roundingMode = .down
+    let string = formatter.string(from: NSNumber(value: foo))
+    */
     
     private var brain = CalculatorBrain()
     
@@ -49,7 +62,9 @@ class ViewController: UIViewController {
     @IBAction func performOperation(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
             brain.setOperand(displayValue)
+            if sender.currentTitle != "C" {
             userIsInTheMiddleOfTyping = false
+            }
         }
         if let mathSymbol = sender.currentTitle {
             brain.performOperation(mathSymbol)
@@ -57,6 +72,10 @@ class ViewController: UIViewController {
         
         if let result = brain.result {
             displayValue = result
+        }
+        
+        if brain.userWantsToStartOver {
+            userIsInTheMiddleOfTyping = false
         }
         
         if brain.operationIsPending {

@@ -14,13 +14,16 @@ struct CalculatorBrain {
     
     var operationIsPending = false
     
+    var userWantsToStartOver = false
+    
     var result: Double? {
         return accumulator
     }
     
     mutating func setOperand(_ operand: Double) {
         accumulator = operand
-        accWasSet = true
+        accumulatorWasSetFromOutside = true
+        userWantsToStartOver = false
         // accWasSet is a private variable that tells when the user typed in the new operand
         // It exists to differ this situation from when the accumulator is a result of previous computations
     }
@@ -41,7 +44,7 @@ struct CalculatorBrain {
                 else {
                     description = symbol
                 }
-                accWasSet = false
+                accumulatorWasSetFromOutside = false
                 
                 
             // Unary Operation
@@ -51,7 +54,7 @@ struct CalculatorBrain {
                         description = description + symbol + "(" +  stringAccumulator + ")"
                     }
                     else {
-                        if accWasSet {
+                        if accumulatorWasSetFromOutside {
                             description = symbol + "(" + stringAccumulator + ")"
                         }
                         else {
@@ -59,19 +62,19 @@ struct CalculatorBrain {
                         }
                     }
                     accumulator = function(accumulator!)
-                    accWasSet = false
+                    accumulatorWasSetFromOutside = false
                 }
                 
                 
             // Binary Operation
             case .binaryOperation (let function):
                 if accumulator != nil  {
-                    if !accWasSet {
+                    if !accumulatorWasSetFromOutside {
                         description = description + symbol
                     }
                     else {
                         if operationIsPending {
-                            description = description + stringAccumulator + symbol
+                            description = "(" + description + stringAccumulator + ")" + symbol
                             performPendingOperation()
                         }
                         else {
@@ -90,17 +93,17 @@ struct CalculatorBrain {
                         description = String(description.characters.dropLast()) + symbol
                     }
                 }
-                accWasSet = false
+                accumulatorWasSetFromOutside = false
                 
             // Equals
             case .equals :
                 if operationIsPending {
-                    if accWasSet {
+                    if accumulatorWasSetFromOutside {
                         description = description + stringAccumulator
                     }
                     performPendingOperation()
                     operationIsPending = false
-                    accWasSet = false
+                    accumulatorWasSetFromOutside = false
                 }
                 
             // Clear all
@@ -109,8 +112,17 @@ struct CalculatorBrain {
                 storedBinaryOperation = nil
                 operationIsPending = false
                 description = " "
-                accWasSet = false
+                accumulatorWasSetFromOutside = false
                 
+            // Backspace button to correct the input
+            // Find better solution than this
+            case .correct :
+                if accumulator != nil && accumulatorWasSetFromOutside {
+                    accumulator = Double(String(stringAccumulator.characters.dropLast())) ?? 0
+                }
+                if accumulator == 0 {
+                    userWantsToStartOver = true
+                }
             }
             
         }
@@ -121,14 +133,14 @@ struct CalculatorBrain {
     
     private var accumulator: Double?
     
-    // getting the string version of accumulator in the correct format
+    // Getting the string version of accumulator in a suitable format
     private var stringAccumulator: String {
         if accumulator != nil {
             if accumulator!.remainder(dividingBy :1) == 0 {
                 return String(format: "%.0f", accumulator!)
             }
             else {
-                return String(format: "%.6f", accumulator!)
+                return String(accumulator!)
             }
         }
         else {
@@ -136,10 +148,11 @@ struct CalculatorBrain {
         }
     }
     
-    private var accWasSet = false
+    private var accumulatorWasSetFromOutside = false
     
     private var storedBinaryOperation: PendingBinaryOperation?
-
+    
+    // Structure of a stored binary operation
     private struct PendingBinaryOperation {
         var function: (Double, Double) -> Double
         let firstOperand: Double
@@ -149,6 +162,7 @@ struct CalculatorBrain {
         }
     }
     
+    // Short function to call the perform function out of stored operation
     private mutating func performPendingOperation () {
         if storedBinaryOperation != nil && accumulator != nil {
             accumulator = storedBinaryOperation!.perform(withSecondOperand: accumulator!)
@@ -163,6 +177,7 @@ struct CalculatorBrain {
         case binaryOperation ((Double, Double) -> Double)
         case equals
         case allClear
+        case correct
     }
     
     // Dictionary of all possible operations
@@ -183,6 +198,8 @@ struct CalculatorBrain {
         "sin"   : OperationType.unaryOperation(sin),
         
         "=" : OperationType.equals,
+        
+        "C" : OperationType.correct,
         
         "AC"    : OperationType.allClear
     ]
