@@ -10,28 +10,37 @@ import Foundation
 
 struct CalculatorBrain {
     
-    var description = " "
-    
-    var operationIsPending = false
-    
     var userWantsToStartOver = false
     
-    var result: Double? {
-        return accumulator
+    mutating func setOperand(variable named: String) {
+        variableOperand = named
+        sequenceOfOperandsAndOperations.append(variableOperand!)
     }
     
-    mutating func setOperand(_ operand: Double) {
-        accumulator = operand
-        accumulatorWasSetFromOutside = true
-        userWantsToStartOver = false
-        // accWasSet is a private variable that tells when the user typed in the new operand
-        // It exists to differ this situation from when the accumulator is a result of previous computations
+    // Function that substituting values for variables
+    // Those values are found in a Dictionary
+    // Dictionary defaults to nil if not supplied when this method is called
+    // If a variable is not found in the Variables Dictionary, its value is zero by default.
+    private func evaluate(using variables: Dictionary<String,Double>? = nil)
+        -> (result: Double?, isPending: Bool, description: String) {
+            let result = 0.0
+            let isPending = false
+            let description = ""
+            return (result, isPending, description)
     }
+    
+    // The old result, description and resultIsPending vars will be implemented
+    // By calling evaluate with the argument nil
+    // (i.e. they will give their answer assuming the value of any variables is zero).
+    
     
     // Main function performing the required action
     mutating func performOperation(_ symbol: String) {
         
         if let operation = operations[symbol] {
+            
+            sequenceOfOperandsAndOperations.append(symbol)
+            print(sequenceOfOperandsAndOperations)
             
             switch operation {
                 
@@ -44,6 +53,7 @@ struct CalculatorBrain {
                 else {
                     description = symbol
                 }
+                result = accumulator
                 accumulatorWasSetFromOutside = false
                 
                 
@@ -62,6 +72,7 @@ struct CalculatorBrain {
                         }
                     }
                     accumulator = function(accumulator!)
+                    result = accumulator
                     accumulatorWasSetFromOutside = false
                 }
                 
@@ -76,6 +87,7 @@ struct CalculatorBrain {
                         if operationIsPending {
                             description = "(" + description + stringAccumulator + ")" + symbol
                             performPendingOperation()
+                            result = accumulator
                         }
                         else {
                             description = stringAccumulator + symbol
@@ -102,6 +114,7 @@ struct CalculatorBrain {
                         description = description + stringAccumulator
                     }
                     performPendingOperation()
+                    result = accumulator
                     operationIsPending = false
                     accumulatorWasSetFromOutside = false
                 }
@@ -109,12 +122,14 @@ struct CalculatorBrain {
             // Clear all
             case .allClear :
                 accumulator = 0
+                result = 0
                 storedBinaryOperation = nil
                 operationIsPending = false
                 description = " "
                 accumulatorWasSetFromOutside = false
+                sequenceOfOperandsAndOperations.removeAll()
                 
-            // Backspace button to correct the input
+                // Backspace button to correct the input
             // Find better solution than this
             case .correct :
                 if accumulator != nil && accumulatorWasSetFromOutside {
@@ -140,6 +155,14 @@ struct CalculatorBrain {
     
     private var accumulator: Double?
     
+    private var variableOperand: String?
+    
+    private var accumulatorWasSetFromOutside = false
+    
+    private var storedBinaryOperation: PendingBinaryOperation?
+    
+    private var sequenceOfOperandsAndOperations = ""
+    
     // Getting the string version of accumulator in a suitable format
     private var stringAccumulator: String {
         if accumulator != nil {
@@ -151,13 +174,10 @@ struct CalculatorBrain {
             }
         }
         else {
+            // This should never happened
             return "Oh snap!"
         }
     }
-    
-    private var accumulatorWasSetFromOutside = false
-    
-    private var storedBinaryOperation: PendingBinaryOperation?
     
     // Structure of a stored binary operation
     private struct PendingBinaryOperation {
@@ -213,4 +233,34 @@ struct CalculatorBrain {
         
         "Rnd"   : OperationType.random
     ]
+    
+    // Old result, description and resultIsPending
+    // Trying to deprecate those
+    
+    var description = ""
+    // var description = { return evaluate().description }
+    
+    var result: Double!
+    // var result = { return evaluate().result }
+
+    var operationIsPending: Bool = false
+    // var operationIsPending = { return evaluate().isPending }
+    
+    mutating func setOperand(_ operand: Double) {
+        accumulator = operand
+        accumulatorWasSetFromOutside = true
+        userWantsToStartOver = false
+        sequenceOfOperandsAndOperations.append(stringAccumulator)
+        // accumulatorWasSetFromOutside is a private variable that tells when the user typed in the new operand
+        // It exists to differ this situation from when the accumulator is a result of previous computations
+    }
+}
+
+
+// Your Model is not just a CalculatorBrain anymore. Your Model is now made up of two different
+// and completely separate structs: a CalculatorBrain and a Dictionary. (the one that contains M’s value).
+// That’s perfectly legal. There’s no rule that says your Model has to be a single data structure.
+// Currently empty dictionaty of variables
+struct variablesDictionary {
+    
 }
