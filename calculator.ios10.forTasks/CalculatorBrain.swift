@@ -257,10 +257,10 @@ struct CalculatorBrain {
 }
 
 
-// Your Model is not just a CalculatorBrain anymore. Your Model is now made up of two different
-// and completely separate structs: a CalculatorBrain and a Dictionary. (the one that contains M’s value).
-// That’s perfectly legal. There’s no rule that says your Model has to be a single data structure.
-// Currently empty dictionaty of variables
+// Model is not just a CalculatorBrain anymore. There are 2 different
+// and completely separate structs: a CalculatorBrain and a Dictionary.
+// (the one that contains M’s value).
+// There’s no rule that says a Model has to be a single data structure.
 struct variablesDictionary {
     
 }
