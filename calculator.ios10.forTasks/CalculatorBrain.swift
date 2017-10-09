@@ -12,8 +12,9 @@ struct CalculatorBrain {
     
     var userWantsToStartOver = false
     
-    mutating func setOperand(variable named: String) {
-        variableOperand = named
+    mutating func setOperand(variable letter: String) {
+        variableOperand = letter
+        variablesDictionary.updateValue(0.0, forKey: letter)
         sequenceOfOperandsAndOperations.append(variableOperand!)
     }
     
@@ -21,7 +22,7 @@ struct CalculatorBrain {
     // Those values are found in a Dictionary
     // Dictionary defaults to nil if not supplied when this method is called
     // If a variable is not found in the Variables Dictionary, its value is zero by default.
-    private func evaluate(using variables: Dictionary<String,Double>? = nil)
+ func evaluate(_ variables: Dictionary<String,Double>? = nil)
         -> (result: Double?, isPending: Bool, description: String) {
             let result = 0.0
             let isPending = false
@@ -243,7 +244,7 @@ struct CalculatorBrain {
     var result: Double!
     // var result = { return evaluate().result }
 
-    var operationIsPending: Bool = false
+    var operationIsPending = false 
     // var operationIsPending = { return evaluate().isPending }
     
     mutating func setOperand(_ operand: Double) {
@@ -254,6 +255,7 @@ struct CalculatorBrain {
         // accumulatorWasSetFromOutside is a private variable that tells when the user typed in the new operand
         // It exists to differ this situation from when the accumulator is a result of previous computations
     }
+    var variablesDictionary: [String: Double] = [:]
 }
 
 
@@ -261,6 +263,4 @@ struct CalculatorBrain {
 // and completely separate structs: a CalculatorBrain and a Dictionary.
 // (the one that contains M’s value).
 // There’s no rule that says a Model has to be a single data structure.
-struct variablesDictionary {
-    
-}
+

@@ -57,6 +57,18 @@ class ViewController: UIViewController {
             userIsInTheMiddleOfTyping = false
             }
         }
+        
+        if sender.currentTitle == "M" {
+            brain.setOperand(variable: "M")
+            displayValue = brain.evaluate().result!
+        }
+        
+        if sender.currentTitle == "→M" {
+            brain.variablesDictionary.updateValue(displayValue, forKey: "M")
+            displayValue = brain.evaluate(brain.variablesDictionary).result!
+            
+        }
+        
         if let mathSymbol = sender.currentTitle {
             brain.performOperation(mathSymbol)
         }
