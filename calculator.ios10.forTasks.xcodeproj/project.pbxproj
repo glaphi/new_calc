@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA3CBB271F98085C00C69B2F /* Thoughts.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3CBB261F98085B00C69B2F /* Thoughts.swift */; };
 		FA6CAA4F1F61B33C00D5ED74 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAA4E1F61B33C00D5ED74 /* AppDelegate.swift */; };
 		FA6CAA511F61B33C00D5ED74 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6CAA501F61B33C00D5ED74 /* ViewController.swift */; };
 		FA6CAA541F61B33C00D5ED74 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA6CAA521F61B33C00D5ED74 /* Main.storyboard */; };
@@ -35,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA3CBB261F98085B00C69B2F /* Thoughts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thoughts.swift; sourceTree = "<group>"; };
 		FA6CAA4B1F61B33C00D5ED74 /* calculator.ios10.forTasks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = calculator.ios10.forTasks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA6CAA4E1F61B33C00D5ED74 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FA6CAA501F61B33C00D5ED74 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				FA6CAA501F61B33C00D5ED74 /* ViewController.swift */,
 				FA6CAA7D1F61B3F500D5ED74 /* CalculatorBrain.swift */,
 				FA6CAA521F61B33C00D5ED74 /* Main.storyboard */,
+				FA3CBB261F98085B00C69B2F /* Thoughts.swift */,
 				FA6CAA7C1F61B3C500D5ED74 /* additional files */,
 			);
 			path = calculator.ios10.forTasks;
@@ -277,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA6CAA7E1F61B3F500D5ED74 /* CalculatorBrain.swift in Sources */,
+				FA3CBB271F98085C00C69B2F /* Thoughts.swift in Sources */,
 				FA6CAA511F61B33C00D5ED74 /* ViewController.swift in Sources */,
 				FA6CAA4F1F61B33C00D5ED74 /* AppDelegate.swift in Sources */,
 			);

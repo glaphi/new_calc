@@ -53,13 +53,20 @@ class ViewController: UIViewController {
     @IBAction func performOperation(_ sender: UIButton) {
         if userIsInTheMiddleOfTyping {
             brain.setOperand(displayValue)
-            if sender.currentTitle != "C" {
-            userIsInTheMiddleOfTyping = false
+            if sender.currentTitle == "C" {
+                if display.text != nil {
+                    let numberToCorrect = display.text!
+                    display.text = String(numberToCorrect.dropLast())
+                    if display.text! == "" {
+                        userIsInTheMiddleOfTyping = false
+                        displayValue = 0
+                    }
+                }
             }
         }
         
         if sender.currentTitle == "M" {
-            brain.setOperand(variable: "M")
+            brain.setOperand("M")
             displayValue = brain.evaluate().result!
         }
         
@@ -75,10 +82,6 @@ class ViewController: UIViewController {
         
         if let result = brain.result {
             displayValue = result
-        }
-        
-        if brain.userWantsToStartOver {
-            userIsInTheMiddleOfTyping = false
         }
         
         if brain.operationIsPending {

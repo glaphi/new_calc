@@ -10,159 +10,149 @@ import Foundation
 
 struct CalculatorBrain {
     
-    var userWantsToStartOver = false
+    private var stackOfOperandsAndOperations = [OperationType]()
+    var variablesDictionary = [String: Double]()
     
-    mutating func setOperand(variable letter: String) {
-        variableOperand = letter
-        variablesDictionary.updateValue(0.0, forKey: letter)
-        sequenceOfOperandsAndOperations.append(variableOperand!)
+    mutating func setOperand(_ variable: String) {
+        variablesDictionary.updateValue(0.0, forKey: variable)
+        stackOfOperandsAndOperations.append(.variable(variable))
     }
     
-    // Function that substituting values for variables
-    // Those values are found in a Dictionary
-    // Dictionary defaults to nil if not supplied when this method is called
-    // If a variable is not found in the Variables Dictionary, its value is zero by default.
- func evaluate(_ variables: Dictionary<String,Double>? = nil)
-        -> (result: Double?, isPending: Bool, description: String) {
-            let result = 0.0
-            let isPending = false
-            let description = ""
-            return (result, isPending, description)
+    mutating func setOperand(_ operand: Double) {
+        accumulator = operand
+        accumulatorWasSetFromOutside = true
+        stackOfOperandsAndOperations.append(.constant(operand))
     }
     
-    // The old result, description and resultIsPending vars will be implemented
-    // By calling evaluate with the argument nil
-    // (i.e. they will give their answer assuming the value of any variables is zero).
     
+    // Dictionary defaults to nil, variabl's value to zero.
+    func evaluate(_ variables: Dictionary<String,Double>? = nil) -> (result: Double?, isPending: Bool, description: String) {
+        //TODO: Pending var, then description
+        
+            func evaluateStack(_ stack: [OperationType]) -> (result: Double?, remainingStack: [OperationType]) {
+                if !stack.isEmpty {
+                    var remainingStack = stack
+                    let lastEntry = remainingStack.removeLast()
+                    switch lastEntry {
+                    case .constant(let operand) :
+                        return (operand, remainingStack)
+                    case .unaryOperation(let function) :
+                        let operandEvaluation = evaluateStack(remainingStack)
+                        if let operand = operandEvaluation.result {
+                            return (function(operand), operandEvaluation.remainingStack)
+                        }
+                    case .binaryOperation(let function) :
+                        let firstOperandEvaluation = evaluateStack(remainingStack)
+                        if let firstOperand = firstOperandEvaluation.result {
+                            let secondOperandEvaluation = evaluateStack(firstOperandEvaluation.remainingStack)
+                            if let secondOperand = secondOperandEvaluation.result {
+                                return (function(firstOperand,secondOperand), secondOperandEvaluation.remainingStack)
+                            }
+                        }
+                    case .variable(let variable) :
+                        if variables != nil {
+                            let operand = variables![variable] ?? 0.0
+                            return (operand, remainingStack)
+                        } // TODO: triple defualting to zero? figure this out
+                        else {
+                            return (0.0, remainingStack)
+                        }
+                    case .allClear : break
+                    case .equals : break
+                    case .random : break
+                    case .correct : break
+                    }
+                }
+                return (nil, stack)
+            }
+        let (result, _) = evaluateStack(stackOfOperandsAndOperations)
+        let description = ""
+        return (result, false, description)
+    }
+    
+    /*// TODO
+    mutating func performOperation(_ symbol: String) {
+        if let operation = operations[symbol] {
+            switch operation {
+            case .constant (let value): stackOfOperandsAndOperations.append(.constant(value))
+            case .unaryOperation (let function): stackOfOperandsAndOperations.append(.unaryOperation(function))
+            case .binaryOperation (let function): stackOfOperandsAndOperations.append(.binaryOperation(function))
+            case .equals : stackOfOperandsAndOperations.append(.equals)
+            case .allClear : stackOfOperandsAndOperations.removeAll()
+            case .correct :
+                if stackOfOperandsAndOperations.last != nil {
+                    stackOfOperandsAndOperations.removeLast()
+                }
+            case .random :
+                let operand = Double(arc4random()) / Double(UInt32.max)
+                stackOfOperandsAndOperations.append(.constant(operand))
+            case .variable (let symbol) :
+                stackOfOperandsAndOperations.append(.variable(symbol))
+            }
+        }
+    }
+    */
     
     // Main function performing the required action
     mutating func performOperation(_ symbol: String) {
-        
         if let operation = operations[symbol] {
-            
-            sequenceOfOperandsAndOperations.append(symbol)
-            print(sequenceOfOperandsAndOperations)
-            
             switch operation {
-                
-            // Constant
             case .constant (let value):
+                stackOfOperandsAndOperations.append(.constant(value))
                 accumulator = value
-                if operationIsPending {
-                    description = description + symbol
-                }
-                else {
-                    description = symbol
-                }
-                result = accumulator
-                accumulatorWasSetFromOutside = false
-                
-                
-            // Unary Operation
             case .unaryOperation (let function):
+                stackOfOperandsAndOperations.append(.unaryOperation(function))
                 if accumulator != nil  {
-                    if operationIsPending {
-                        description = description + symbol + "(" +  stringAccumulator + ")"
-                    }
-                    else {
-                        if accumulatorWasSetFromOutside {
-                            description = symbol + "(" + stringAccumulator + ")"
-                        }
-                        else {
-                            description = symbol + "(" + description + ")"
-                        }
-                    }
                     accumulator = function(accumulator!)
-                    result = accumulator
-                    accumulatorWasSetFromOutside = false
                 }
-                
-                
-            // Binary Operation
             case .binaryOperation (let function):
                 if accumulator != nil  {
-                    if !accumulatorWasSetFromOutside {
-                        description = description + symbol
-                    }
-                    else {
-                        if operationIsPending {
-                            description = "(" + description + stringAccumulator + ")" + symbol
-                            performPendingOperation()
-                            result = accumulator
-                        }
-                        else {
-                            description = stringAccumulator + symbol
-                        }
-                    }
                     storedBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
                     operationIsPending = true
                     accumulator = nil
                 }
                 else {
-                    // This is in case the user keeps pushing binary operation buttons
-                    // The last one he pressed will be used in the future computations
                     if storedBinaryOperation != nil {
                         storedBinaryOperation!.function = function
-                        description = String(description.characters.dropLast()) + symbol
+                        stackOfOperandsAndOperations.removeLast()
                     }
                 }
-                accumulatorWasSetFromOutside = false
-                
-            // Equals
+                stackOfOperandsAndOperations.append(.binaryOperation(function))
             case .equals :
+                stackOfOperandsAndOperations.append(.equals)
                 if operationIsPending {
-                    if accumulatorWasSetFromOutside {
-                        description = description + stringAccumulator
-                    }
                     performPendingOperation()
-                    result = accumulator
                     operationIsPending = false
-                    accumulatorWasSetFromOutside = false
                 }
-                
-            // Clear all
             case .allClear :
                 accumulator = 0
-                result = 0
                 storedBinaryOperation = nil
                 operationIsPending = false
                 description = " "
                 accumulatorWasSetFromOutside = false
-                sequenceOfOperandsAndOperations.removeAll()
-                
-                // Backspace button to correct the input
-            // Find better solution than this
+                stackOfOperandsAndOperations.removeAll()
+            // Corrector: undo the last operation except for storing the value of M
             case .correct :
-                if accumulator != nil && accumulatorWasSetFromOutside {
-                    accumulator = Double(String(stringAccumulator.characters.dropLast())) ?? 0
+                if stackOfOperandsAndOperations.last != nil {
+                    stackOfOperandsAndOperations.removeLast()
                 }
-                if accumulator == 0 {
-                    userWantsToStartOver = true
-                }
-                
             // Generate a random number between 0 and 1
             case .random :
-                accumulator = Double(arc4random()) / Double(UInt32.max)
-                if accumulator != nil {
-                    print(stringAccumulator)
-                }
+                let operand = Double(arc4random()) / Double(UInt32.max)
+                stackOfOperandsAndOperations.append(.constant(operand))
+                accumulator = operand
+            case .variable (let symbol) :
+                stackOfOperandsAndOperations.append(.variable(symbol))
+                accumulator = 0
             }
-            
         }
-        
     }
     
     // Private variables etc
-    
     private var accumulator: Double?
-    
     private var variableOperand: String?
-    
     private var accumulatorWasSetFromOutside = false
-    
     private var storedBinaryOperation: PendingBinaryOperation?
-    
-    private var sequenceOfOperandsAndOperations = ""
     
     // Getting the string version of accumulator in a suitable format
     private var stringAccumulator: String {
@@ -170,21 +160,15 @@ struct CalculatorBrain {
             if accumulator!.remainder(dividingBy :1) == 0 {
                 return String(format: "%.0f", accumulator!)
             }
-            else {
-                return String(accumulator!)
-            }
+            else { return String(accumulator!) }
         }
-        else {
-            // This should never happened
-            return "Oh snap!"
-        }
+        else { return "Oh snap!" }
     }
     
     // Structure of a stored binary operation
     private struct PendingBinaryOperation {
         var function: (Double, Double) -> Double
         let firstOperand: Double
-        
         func perform (withSecondOperand secondOperand: Double) -> Double {
             return function(firstOperand, secondOperand)
         }
@@ -203,64 +187,36 @@ struct CalculatorBrain {
         case constant(Double)
         case unaryOperation ((Double) -> Double)
         case binaryOperation ((Double, Double) -> Double)
-        case equals
-        case allClear
-        case correct
+        case variable(String)
         case random
+        case equals
+        case correct
+        case allClear
     }
     
     // Dictionary of all possible operations
     private var operations: Dictionary<String, OperationType> = [
         "π" : OperationType.constant(Double.pi),
         "e" : OperationType.constant(M_E),
-        
         "+" : OperationType.binaryOperation({$0+$1}),
         "-" : OperationType.binaryOperation({$0-$1}),
         "/" : OperationType.binaryOperation({$0/$1}),
         "x" : OperationType.binaryOperation({$0*$1}),
-        
         "ˆ2"    : OperationType.unaryOperation({$0*$0}),
         "√"     : OperationType.unaryOperation(sqrt),
         "%"     : OperationType.unaryOperation({$0/100}),
         "±"     : OperationType.unaryOperation({-1*$0}),
         "cos"   : OperationType.unaryOperation(cos),
         "sin"   : OperationType.unaryOperation(sin),
-        
         "=" : OperationType.equals,
-        
         "C" : OperationType.correct,
-        
         "AC"    : OperationType.allClear,
-        
         "Rnd"   : OperationType.random
     ]
     
-    // Old result, description and resultIsPending
-    // Trying to deprecate those
-    
+    // TODO: deprecate those
+    // var (result, operationIsPending, description)  = evaluate()
     var description = ""
-    // var description = { return evaluate().description }
-    
     var result: Double!
-    // var result = { return evaluate().result }
-
-    var operationIsPending = false 
-    // var operationIsPending = { return evaluate().isPending }
-    
-    mutating func setOperand(_ operand: Double) {
-        accumulator = operand
-        accumulatorWasSetFromOutside = true
-        userWantsToStartOver = false
-        sequenceOfOperandsAndOperations.append(stringAccumulator)
-        // accumulatorWasSetFromOutside is a private variable that tells when the user typed in the new operand
-        // It exists to differ this situation from when the accumulator is a result of previous computations
-    }
-    var variablesDictionary: [String: Double] = [:]
+    var operationIsPending = false
 }
-
-
-// Model is not just a CalculatorBrain anymore. There are 2 different
-// and completely separate structs: a CalculatorBrain and a Dictionary.
-// (the one that contains M’s value).
-// There’s no rule that says a Model has to be a single data structure.
-
