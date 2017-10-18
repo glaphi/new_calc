@@ -24,10 +24,18 @@ struct CalculatorBrain {
         stackOfOperandsAndOperations.append(.constant(operand))
     }
     
+    var result: Double? {
+        get {
+            return evaluate().result
+        }
+        set {
+            result = newValue
+        }
+    }
     
     // Dictionary defaults to nil, variabl's value to zero.
     func evaluate(_ variables: Dictionary<String,Double>? = nil) -> (result: Double?, isPending: Bool, description: String) {
-        //TODO: Pending var, then description
+        //TODO: Fix binary operation, Pending var, then description
         
             func evaluateStack(_ stack: [OperationType]) -> (result: Double?, remainingStack: [OperationType]) {
                 if !stack.isEmpty {
@@ -217,6 +225,5 @@ struct CalculatorBrain {
     // TODO: deprecate those
     // var (result, operationIsPending, description)  = evaluate()
     var description = ""
-    var result: Double!
     var operationIsPending = false
 }
