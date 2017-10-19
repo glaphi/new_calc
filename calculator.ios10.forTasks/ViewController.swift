@@ -10,9 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    var userIsInTheMiddleOfTyping = false
+    private var usingVariables = false
+
+    private var userIsInTheMiddleOfTyping = false
     
-    let formatter = NumberFormatter()
+    private let formatter = NumberFormatter()
     
     var displayValue: Double {
         get { return Double(display.text!)! }
@@ -51,51 +53,67 @@ class ViewController: UIViewController {
     }
     
     @IBAction func performOperation(_ sender: UIButton) {
-        if userIsInTheMiddleOfTyping {
-            brain.setOperand(displayValue)
-            if sender.currentTitle == "C" {
-                if display.text != nil {
-                    let numberToCorrect = display.text!
-                    display.text = String(numberToCorrect.dropLast())
-                    if display.text! == "" {
-                        userIsInTheMiddleOfTyping = false
-                        displayValue = 0
+        
+        if sender.currentTitle == "→M" {
+            brain.variablesDictionary.updateValue(displayValue, forKey: "M")
+            userIsInTheMiddleOfTyping = false
+            usingVariables = true
+        }
+        else {
+            if userIsInTheMiddleOfTyping {
+                brain.setOperand(displayValue)
+                if sender.currentTitle == "C" {
+                    if display.text != nil {
+                        let numberToCorrect = display.text!
+                        display.text = String(numberToCorrect.dropLast())
+                        if display.text! == "" {
+                            userIsInTheMiddleOfTyping = false
+                            displayValue = 0
+                        }
                     }
+                }
+                else {
+                    userIsInTheMiddleOfTyping = false
                 }
             }
         }
         
-        if sender.currentTitle == "M" {
-            brain.setOperand("M")
-            displayValue = brain.evaluate().result!
+        if sender.currentTitle == "AC" {
+            usingVariables = false
         }
         
-        if sender.currentTitle == "→M" {
-            brain.variablesDictionary.updateValue(displayValue, forKey: "M")
-            displayValue = brain.evaluate(brain.variablesDictionary).result!
-            
+        if sender.currentTitle == "M" {
+            brain.setOperand("M")
         }
         
         if let mathSymbol = sender.currentTitle {
-            brain.performOperation(mathSymbol)
+            brain.createStack(mathSymbol)
         }
         
-        if let result = brain.result {
-            displayValue = result
-        }
-        
-        if brain.operationIsPending {
-            descriptionLabel.text = brain.description + "..."
+        if usingVariables {
+            if let result = brain.evaluate(brain.variablesDictionary).result {
+                displayValue = result
+            }
         }
         else {
-            if brain.description != " " {
-                descriptionLabel.text = brain.description + "="
+            if let result = brain.evaluate().result {
+                displayValue = result
             }
-            else {
-                descriptionLabel.text = " "
-            }
-            
         }
+        
+        
+        //                if brain.operationIsPending {
+        //                    descriptionLabel.text = brain.description + "..."
+        //                }
+        //                else {
+        //                    if brain.description != " " {
+        //                        descriptionLabel.text = brain.description + "="
+        //                    }
+        //                    else {
+        //                        descriptionLabel.text = " "
+        //                    }
+        //
+        //                }
     }
 }
 

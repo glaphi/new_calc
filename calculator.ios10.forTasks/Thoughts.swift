@@ -120,3 +120,59 @@ mutating func performOperation(_ symbol: String) {
     
 }
 */
+
+//// Main function performing the required action
+//mutating func performOperation(_ symbol: String) {
+//    if let operation = operations[symbol] {
+//        switch operation {
+//        case .constant (let value):
+//            stackOfOperandsAndOperations.append(.constant(value))
+//            accumulator = value
+//        case .unaryOperation (let function):
+//            stackOfOperandsAndOperations.append(.unaryOperation(function))
+//            if accumulator != nil  {
+//                accumulator = function(accumulator!)
+//            }
+//        case .binaryOperation (let function):
+//            if accumulator != nil  {
+//                storedBinaryOperation = PendingBinaryOperation(function: function, firstOperand: accumulator!)
+//                operationIsPending = true
+//                accumulator = nil
+//            }
+//            else {
+//                if storedBinaryOperation != nil {
+//                    storedBinaryOperation!.function = function
+//                    stackOfOperandsAndOperations.removeLast()
+//                }
+//            }
+//            stackOfOperandsAndOperations.append(.binaryOperation(function))
+//        case .equals :
+//            stackOfOperandsAndOperations.append(.equals)
+//            if operationIsPending {
+//                performPendingOperation()
+//                operationIsPending = false
+//            }
+//        case .allClear :
+//            accumulator = 0
+//            storedBinaryOperation = nil
+//            operationIsPending = false
+//            description = " "
+//            accumulatorWasSetFromOutside = false
+//            stackOfOperandsAndOperations.removeAll()
+//        // Corrector: undo the last operation except for storing the value of M
+//        case .correct :
+//            if stackOfOperandsAndOperations.last != nil {
+//                stackOfOperandsAndOperations.removeLast()
+//            }
+//        // Generate a random number between 0 and 1
+//        case .random :
+//            let operand = Double(arc4random()) / Double(UInt32.max)
+//            stackOfOperandsAndOperations.append(.constant(operand))
+//            accumulator = operand
+//        case .variable (let symbol) :
+//            stackOfOperandsAndOperations.append(.variable(symbol))
+//            accumulator = 0
+//        }
+//    }
+//}
+
