@@ -10,6 +10,45 @@ import Foundation
 
 struct CalculatorBrain {
     
+    // Private variables etc
+    private var variableOperand: String?
+    private var storedOperation: OperationType?
+    private var userKeepsPresingBinaryOperations = false
+    private var storedDescription = " "
+    var operationIsPending = false
+    
+    // Types of operations
+    private enum OperationType {
+        case constant(Double)
+        case unaryOperation ((Double) -> Double)
+        case binaryOperation ((Double, Double) -> Double)
+        case variable(String)
+        case random
+        case equals
+        case correct
+        case allClear
+    }
+    
+    // Dictionary of all possible operations
+    private var operations: Dictionary<String, OperationType> = [
+        "π" : OperationType.constant(Double.pi),
+        "e" : OperationType.constant(M_E),
+        "+" : OperationType.binaryOperation({$0+$1}),
+        "-" : OperationType.binaryOperation({$0-$1}),
+        "/" : OperationType.binaryOperation({$0/$1}),
+        "x" : OperationType.binaryOperation({$0*$1}),
+        "ˆ2"    : OperationType.unaryOperation({$0*$0}),
+        "√"     : OperationType.unaryOperation(sqrt),
+        "%"     : OperationType.unaryOperation({$0/100}),
+        "±"     : OperationType.unaryOperation({-1*$0}),
+        "cos"   : OperationType.unaryOperation(cos),
+        "sin"   : OperationType.unaryOperation(sin),
+        "=" : OperationType.equals,
+        "C" : OperationType.correct,
+        "AC"    : OperationType.allClear,
+        "Rnd"   : OperationType.random
+    ]
+    
     private var stackOfOperandsAndOperations = [OperationType]()
     var variablesDictionary = [String: Double]()
     
@@ -20,13 +59,16 @@ struct CalculatorBrain {
     
     mutating func setOperand(_ operand: Double) {
         stackOfOperandsAndOperations.append(.constant(operand))
+        storedDescription = description
+        description += String(operand)
     }
     
     // Dictionary defaults to nil, variabl's value to zero.
     func evaluate(_ variables: Dictionary<String,Double>? = nil) -> (result: Double?, isPending: Bool, description: String) {
         //TODO: Pending var, then description
-        
-            func evaluateStack(_ stack: [OperationType]) -> (result: Double?, remainingStack: [OperationType]) {
+        var description = ""
+
+        func evaluateStack(_ stack: [OperationType]) -> (result: Double?, remainingStack: [OperationType]) {
                 if !stack.isEmpty {
                     var remainingStack = stack
                     let lastEntry = remainingStack.removeLast()
@@ -66,7 +108,6 @@ struct CalculatorBrain {
                 return (nil, stack)
             }
         let (result, _) = evaluateStack(stackOfOperandsAndOperations)
-        let description = ""
         return (result, false, description)
     }
     
@@ -78,15 +119,22 @@ struct CalculatorBrain {
             case .constant (let value):
                 userKeepsPresingBinaryOperations = false
                 stackOfOperandsAndOperations.append(.constant(value))
+                storedDescription = description
+                description += symbol
             case .unaryOperation (let function):
                 userKeepsPresingBinaryOperations = false
                 stackOfOperandsAndOperations.append(.unaryOperation(function))
+                storedDescription = description
+                description = symbol + "(" + description + ")"
             case .binaryOperation (let function):
                 if (userKeepsPresingBinaryOperations == false) && (storedOperation != nil) {
                     stackOfOperandsAndOperations.append(storedOperation!)
                 }
                 storedOperation = .binaryOperation(function)
                 userKeepsPresingBinaryOperations = true
+                operationIsPending = true
+                storedDescription = description
+                description += symbol
             case .equals :
                 if storedOperation != nil {
                     stackOfOperandsAndOperations.append(storedOperation!)
@@ -94,61 +142,35 @@ struct CalculatorBrain {
                 }
                 stackOfOperandsAndOperations.append(.equals)
                 userKeepsPresingBinaryOperations = false
+                operationIsPending = false
+                storedDescription = description
+                description = "(" + description + ")"
             case .allClear :
                 stackOfOperandsAndOperations.removeAll()
                 userKeepsPresingBinaryOperations = false
+                description = " "
+                storedDescription = description
             case .correct :
                 userKeepsPresingBinaryOperations = false
                 if stackOfOperandsAndOperations.last != nil {
                     stackOfOperandsAndOperations.removeLast()
                 }
+                description = storedDescription
             case .random :
                 userKeepsPresingBinaryOperations = false
                 let operand = Double(arc4random()) / Double(UInt32.max)
                 stackOfOperandsAndOperations.append(.constant(operand))
+                storedDescription = description
+                description += String(operand)
             case .variable (let symbol) :
+                storedDescription = description
+                description += symbol + "aaaa"
                 userKeepsPresingBinaryOperations = false
                 stackOfOperandsAndOperations.append(.variable(symbol))
+                print (symbol)
             }
         }
     }
- 
-    // Private variables etc
-    private var variableOperand: String?
-    private var storedOperation: OperationType?
-    private var userKeepsPresingBinaryOperations = false
-    
-    // Types of operations
-    private enum OperationType {
-        case constant(Double)
-        case unaryOperation ((Double) -> Double)
-        case binaryOperation ((Double, Double) -> Double)
-        case variable(String)
-        case random
-        case equals
-        case correct
-        case allClear
-    }
-    
-    // Dictionary of all possible operations
-    private var operations: Dictionary<String, OperationType> = [
-        "π" : OperationType.constant(Double.pi),
-        "e" : OperationType.constant(M_E),
-        "+" : OperationType.binaryOperation({$0+$1}),
-        "-" : OperationType.binaryOperation({$0-$1}),
-        "/" : OperationType.binaryOperation({$0/$1}),
-        "x" : OperationType.binaryOperation({$0*$1}),
-        "ˆ2"    : OperationType.unaryOperation({$0*$0}),
-        "√"     : OperationType.unaryOperation(sqrt),
-        "%"     : OperationType.unaryOperation({$0/100}),
-        "±"     : OperationType.unaryOperation({-1*$0}),
-        "cos"   : OperationType.unaryOperation(cos),
-        "sin"   : OperationType.unaryOperation(sin),
-        "=" : OperationType.equals,
-        "C" : OperationType.correct,
-        "AC"    : OperationType.allClear,
-        "Rnd"   : OperationType.random
-    ]
     
     // TODO: deprecate those
     // var (result, operationIsPending, description)  = evaluate()
