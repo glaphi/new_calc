@@ -59,7 +59,7 @@ struct CalculatorBrain {
                         else {
                             return (666, remainingStack)
                         }
-                    case .allClear : return (nil, [])
+                    case .allClear : return (0, [])
                     case .equals : return evaluateStack(remainingStack)
                     default : break
                     }
