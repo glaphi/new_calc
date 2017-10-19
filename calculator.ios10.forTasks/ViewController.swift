@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController {
     
     private var usingVariables = false
-
+    
     private var userIsInTheMiddleOfTyping = false
     
     private let formatter = NumberFormatter()
@@ -80,6 +80,7 @@ class ViewController: UIViewController {
         
         if sender.currentTitle == "AC" {
             usingVariables = false
+            displayValue = 0
         }
         
         if sender.currentTitle == "M" {
@@ -101,19 +102,6 @@ class ViewController: UIViewController {
             }
         }
         
-        
-        //                if brain.operationIsPending {
-        //                    descriptionLabel.text = brain.description + "..."
-        //                }
-        //                else {
-        //                    if brain.description != " " {
-        //                        descriptionLabel.text = brain.description + "="
-        //                    }
-        //                    else {
-        //                        descriptionLabel.text = " "
-        //                    }
-        //
-        //                }
     }
 }
 

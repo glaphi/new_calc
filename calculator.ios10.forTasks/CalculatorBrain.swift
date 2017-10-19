@@ -57,9 +57,8 @@ struct CalculatorBrain {
                         }
                          // TODO: triple defualting to zero? figure this out
                         else {
-                            return (666, remainingStack)
+                            return (0, remainingStack)
                         }
-                    case .allClear : return (0, [])
                     case .equals : return evaluateStack(remainingStack)
                     default : break
                     }
